@@ -114,3 +114,98 @@ To access a container:
 kubectl exec -ti kubernetes-first-app-76f586cc68-6bklf bash
 ```
 
+### Service
+
+A `service` in Kubernetes is an abstraction which defines a logical set of Pods and policy by which to access them.
+
+Check existing Pods:
+
+```shell
+kubectl get pods
+
+# NAME                                    READY   STATUS    RESTARTS   AGE
+# kubernetes-first-app-76f586cc68-6bklf   1/1     Running   0          47m
+```
+
+List services:
+
+```shell
+kubectl get services
+
+# NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+# kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   3h44m
+```
+
+Create a service:
+
+```shell
+kubectl expose deployment/kubernetes-first-app --type="NodePort" --port 8080
+# service/kubernetes-first-app exposed
+```
+
+Use `get services` to provide the node port, alternativly:
+
+```shell
+kubectl get services/kubernetes-first-app -o go-template='{{(index .spec.ports 0).nodePort}}'
+
+# 31849
+```
+
+To determine a Pod's cluster IP:
+
+```shell
+kubectl get pod -o wide
+```
+
+#### Labels
+
+View labels on a deployment:
+
+```shell
+kubectl describe deployment
+
+# Labels:  app=kubernetes-first-app
+```
+
+Query pods with the label:
+
+```shell
+kubectl get pods -l app=kubernetes-first-app
+
+# NAME                                    READY   STATUS    RESTARTS   AGE
+# kubernetes-first-app-76f586cc68-6bklf   1/1     Running   0          58m
+```
+
+Query services with the label:
+
+```shell
+kubectl get services -l app=kubernetes-first-app
+
+# NAME                   TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+# kubernetes-first-app   NodePort   10.109.200.145   <none>        8080:31849/TCP   8m10s
+```
+
+Add a label:
+
+```shell
+kubectl label pod kubernetes-first-app-76f586cc68-6bklf ver=v1
+
+# pod/kubernetes-first-app-76f586cc68-6bklf labeled
+
+kubectl describe pods kubernetes-first-app-76f586cc68-6bklf
+
+# Labels: app=kubernetes-first-app
+#         pod-template-hash=76f586cc68
+#         ver=v1
+```
+
+#### Remove
+
+```shell
+kubectl delete service -l app=kubernetes-first-app
+
+# service "kubernetes-first-app" deleted
+
+kubectl get services
+```
+
