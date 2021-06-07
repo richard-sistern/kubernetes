@@ -18,5 +18,99 @@ kubectl get nodes
 # docker-desktop   Ready    master   162m   v1.19.7
 ```
 
-## Examples
+### Deployment
+
+Create a deployment:
+
+```shell
+# Previous Command
+# kubectl run kubernetes-first-app --image=gcr.io/google-samples/kubernetes-bootcamp:v1 --port=8080
+
+kubectl create deployment kubernetes-first-app --image=gcr.io/google-samples/kubernetes-bootcamp:v1 --port=8080
+
+# deployment.apps/kubernetes-first-app created
+```
+
+Check a [deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) was created:
+
+```shell
+kubectl get deployments
+
+# NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+# kubernetes-first-app   1/1     1            1           12s
+```
+
+Check the rollout status of a deployment:
+
+```shell
+kubectl rollout status deployment/kubernetes-first-app
+
+# deployment "kubernetes-first-app" successfully rolled out
+```
+
+The deployment places the container and app inside a [Pod](https://kubernetes.io/docs/concepts/workloads/pods/pod/), which represents the smallest deployable unit.  These run within a private isolate network, which is visible to other pods and services but cannot be accessed outside the network.
+
+### Proxy
+
+To expose an HTTP API:
+
+```shell
+kubectl proxy
+
+# Starting to serve on 127.0.0.1:8001
+```
+
+Which can be queried with `curl`:
+
+```shell
+curl http://localhost:8001/version
+{
+  "major": "1",
+  "minor": "19",
+  "gitVersion": "v1.19.7",
+  "gitCommit": "1dd5338295409edcfff11505e7bb246f0d325d15",
+  "gitTreeState": "clean",
+  "buildDate": "2021-01-13T13:15:20Z",
+  "goVersion": "go1.15.5",
+  "compiler": "gc",
+  "platform": "linux/amd64"
+}
+```
+
+### Pods
+
+List Pod names with:
+
+```shell
+kubectl get pods
+
+# NAME                                    READY   STATUS    RESTARTS   AGE
+# kubernetes-first-app-76f586cc68-6bklf   1/1     Running   0          17m
+```
+
+To learn more about a specific pod:
+
+```shell
+curl http://localhost:8001/api/v1/namespaces/default/pods/kubernetes-first-app-76f586cc68-6bklf
+```
+
+To view a Pods logs:
+
+```shell
+kubectl logs kubernetes-first-app-76f586cc68-6bklf
+
+# Kubernetes Bootcamp App Started At: 2021-06-07T18:52:35.034Z | Running On:  kubernetes-first-app-76f586cc68-6bklf
+```
+
+To view a pods environment variables:
+
+```shell
+kubectl exec kubernetes-first-app-76f586cc68-6bklf env
+```
+
+To access a container:
+
+```shell
+kubectl exec -ti kubernetes-first-app-76f586cc68-6bklf bash
+```
 
