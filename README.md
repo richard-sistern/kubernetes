@@ -3,9 +3,10 @@
 
 ## Notes
 
-[The basics](./k8-basics.md)
+- [The basics](./k8-basics.md)
 
 ## Resources
 
-- [Kubernetes from the beginning](https://dev.to/softchris/series/1067) 
+- [Kubernetes from the beginning](https://dev.to/softchris/series/1067)
+- [Official site](https://kubernetes.io/)
 
