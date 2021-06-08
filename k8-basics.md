@@ -209,3 +209,34 @@ kubectl delete service -l app=kubernetes-first-app
 kubectl get services
 ```
 
+### Scaling
+
+To scale a deployment:
+
+```shell
+kubectl get deployments
+
+# NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+# kubernetes-first-app   1/1     1            1           24h
+
+kubectl scale deployments/kubernetes-first-app --replicas=4 
+
+# deployment.apps/kubernetes-first-app scaled
+
+kubectl get deployments
+
+# NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+# kubernetes-first-app   4/4     4            4           24h
+```
+
+Additional information on a scaling operation:
+
+```shell
+kubectl describe deployments/kubernetes-first-app
+
+# Events:
+#   Type    Reason             Age   From                   Message
+#   ----    ------             ----  ----                   -------
+#   Normal  ScalingReplicaSet  2m2s  deployment-controller  Scaled up replica set kubernetes-first-app-76f586cc68 to 4
+```
+
