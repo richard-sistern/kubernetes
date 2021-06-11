@@ -211,6 +211,8 @@ kubectl get services
 
 ### Scaling
 
+#### Scale Up
+
 To scale a deployment:
 
 ```shell
@@ -238,5 +240,54 @@ kubectl describe deployments/kubernetes-first-app
 #   Type    Reason             Age   From                   Message
 #   ----    ------             ----  ----                   -------
 #   Normal  ScalingReplicaSet  2m2s  deployment-controller  Scaled up replica set kubernetes-first-app-76f586cc68 to 4
+```
+
+#### Load Balancing
+
+When scaled, requests can be handled by any replica.
+
+```shell
+kubectl describe services/kubernetes-first-app
+
+# NodePort:                 <unset>  31863/TCP
+# Endpoints:                10.1.0.100:8080,10.1.0.96:8080,10.1.0.98:8080 + 1 more...
+```
+
+With the NodePort, we can test load balancing is working:
+
+```shell
+curl ClusterIP:NodePort
+```
+
+#### Scale Down
+
+To scale down:
+
+```shell
+kubectl scale deployments/kubernetes-first-app --replicas=2 
+
+kubectl get deployments
+# NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+# kubernetes-first-app   2/2     2            2           3d20h
+```
+
+### Self-healing
+
+If a pods dies, a new one will appear in it's place.  To test this:
+
+```shell
+kubectl get pods
+
+# NAME                                    READY   STATUS    RESTARTS   AGE
+# kubernetes-first-app                    1/1     Running   11         3d21h
+# kubernetes-first-app-76f586cc68-nv7xl   1/1     Running   8          2d20h
+
+kubectl delete pods kubernetes-first-app-76f586cc68-nv7xl
+
+kubectl get pods
+
+# NAME                                    READY   STATUS    RESTARTS   AGE
+# kubernetes-first-app                    1/1     Running   11         3d21h
+# kubernetes-first-app-76f586cc68-pjcng   1/1     Running   0          80s
 ```
 
