@@ -293,3 +293,104 @@ kubectl get pods
 # kubernetes-first-app-76f586cc68-pjcng   1/1     Running   0          80s
 ```
 
+### Dashboard
+
+*Based on the [Web UI (Dashboard)](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) Kubernetes documentation*
+
+To install the dashboard:
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/alternative/kubernetes-dashboard.yaml
+
+# namespace/kubernetes-dashboard created
+# serviceaccount/kubernetes-dashboard created
+# service/kubernetes-dashboard created
+# ...
+```
+
+Start the proxy:
+
+```shell
+kubectl proxy
+```
+
+Create a service account and bind to cluster admin role:
+
+```shell
+kubectl create serviceaccount dashboard-admin
+
+# serviceaccount/dashboard-admin created
+
+kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin
+
+# clusterrolebinding.rbac.authorization.k8s.io/dashboard-admin created
+```
+
+List tokens to use for dashboard authentication:
+
+```shell
+kubectl get secrets
+
+# NAME                          TYPE                                  DATA   AGE
+# dashboard-admin-token-4qz8z   kubernetes.io/service-account-token   3      2m24s
+
+kubectl describe secret dashboard-admin-token-4qz8z
+
+# token:      eyJhbGciOiJSUzI1NiIsImtpZ...
+```
+
+The dashboard is now available at http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+
+### Autoscaling
+
+*Adapted from [Horizontal Pod Autoscaler Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/)*
+
+Horizontal autoscaling can be used on a `replication controller`, `deplloyment` and `replica set`.  This usually used CPU as a metric but `custom metrics support` is also available.
+
+To use the auto-scaler, the [metrics server](https://github.com/kubernetes-sigs/metrics-server) has to be installed to provide required metrics API
+
+```shell
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+ 
+
+```shell
+kubectl apply -f https://k8s.io/examples/application/php-apache.yaml
+
+# deployment.apps/php-apache created
+# service/php-apache created
+
+kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+
+# horizontalpodautoscaler.autoscaling/php-apache autoscaled
+```
+
+Examine current status of the auto-scaler with:
+
+```shell
+kubectl get hpa
+
+# NAME         REFERENCE               TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+# php-apache   Deployment/php-apache   <unknown>/50%   1         10        0          20s
+```
+
+Increase the load with:
+
+```shell
+kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+
+# If you don't see a command prompt, try pressing enter.
+# OK!OK!OK!OK!OK!OK!...
+
+kubectl get hpa
+
+# NAME         REFERENCE                     TARGET      MINPODS   MAXPODS   REPLICAS   AGE
+# php-apache   Deployment/php-apache/scale   305% / 50%  1         10        1          3m
+
+kubectl get deployment php-apache
+
+# NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+# php-apache   7/7      7           7           19m
+```
+
