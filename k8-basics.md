@@ -1,5 +1,7 @@
 # Kubernetes Basics
 
+*Notes from the [Kubernetes from the beginning](https://dev.to/softchris/series/1067) series by [Chris Noring](https://twitter.com/chris_noring)*
+
 ## Commands
 
 ```shell
